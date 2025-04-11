@@ -240,7 +240,7 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
 # Streamlit User Interface
 # =============================================================================
 
-st.title("Cyber Nations Population + Land Growth Optimization Tool")
+st.title("Cyber Nations | Population + Land Growth Optimization Tool")
 st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth.")
 
 st.sidebar.header("Base Parameters")
@@ -252,8 +252,8 @@ st.sidebar.header("Optimization Weights and Factors")
 weight_pop = st.sidebar.slider("Weight for Population", 0.0, 2.0, 1.0, 0.1)
 weight_land = st.sidebar.slider("Weight for Land", 0.0, 2.0, 1.0, 0.1)
 happiness_factor = st.sidebar.number_input("Happiness Factor", min_value=1, value=100, step=10,
-                                           help="Each unit of total happiness adjustment is multiplied by this factor.")
-
+    help="Scales the total happiness adjustment (from government, DEFCON, and technology). For example, if the total adjustment is 2, a factor of 100 adds 200 to the population. This is needed because the raw adjustments are small integers; the factor amplifies their effect, making happiness a more significant driver of population growth in the model."
+)
 # Optimize button in sidebar
 if st.sidebar.button("Optimize"):
     with st.spinner("Optimizing, please wait..."):
@@ -265,8 +265,8 @@ if st.sidebar.button("Optimize"):
     st.dataframe(sorted_results.head(20))
     csv = sorted_results.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="Download full results as CSV",
+        label="Download Results",
         data=csv,
-        file_name='cyber_nations_optimization_results.csv',
+        file_name='cyber_nations_population_land_optimization_results.csv',
         mime='text/csv',
     )
