@@ -130,9 +130,13 @@ DEFCON_HAPPINESS = {5: 2, 4: 1, 3: 0, 2: -1, 1: -2}
 
 # =============================================================================
 # Other Key Variables
+#
+# War mode is a boolean array indicating whether the nation is at war.
+# Tax rate is fixed at 30%, since most players consider taxes lower than 28% intolerable
+# and 30% is the standard setting.
 # =============================================================================
 WAR_MODES = [True, False]
-TAX_RATES = list(range(1, 29))
+FIXED_TAX_RATE = 30  # Fixed at 30%
 
 # =============================================================================
 # Technology Happiness Bonus
@@ -180,7 +184,7 @@ def tech_happiness_bonus(tech):
 # and the government’s land multiplier.
 # =============================================================================
 
-def calculate_population(government, defcon, war_mode, tax_rate, infra, tech, base_pop=1000, happiness_factor=100):
+def calculate_population(government, defcon, war_mode, infra, tech, base_pop=1000, happiness_factor=100):
     base_population = base_pop + (infra * 100) + (tech * 10)
     gov_hap = GOVERNMENTS[government]["happiness"]
     defcon_hap = DEFCON_HAPPINESS[defcon]
@@ -188,7 +192,7 @@ def calculate_population(government, defcon, war_mode, tax_rate, infra, tech, ba
     total_hap_adj = gov_hap + defcon_hap + tech_hap
     adjusted_population = base_population + (total_hap_adj * happiness_factor)
     war_multiplier = 0.9 if war_mode else 1.0
-    tax_multiplier = 1 - (tax_rate / 200)
+    tax_multiplier = 1 - (FIXED_TAX_RATE / 200)
     population = adjusted_population * war_multiplier * tax_multiplier
     return population
 
@@ -210,15 +214,16 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
     best_score = -1
     best_config = None
     results = []
-    for gov, d, w, t in itertools.product(GOVERNMENTS.keys(), DEFCON_HAPPINESS.keys(), WAR_MODES, TAX_RATES):
-        pop = calculate_population(gov, d, w, t, infra, tech, happiness_factor=happiness_factor)
+    # Since the tax rate is fixed at 30%, we no longer iterate over it.
+    for gov, d, w in itertools.product(GOVERNMENTS.keys(), DEFCON_HAPPINESS.keys(), WAR_MODES):
+        pop = calculate_population(gov, d, w, infra, tech, happiness_factor=happiness_factor)
         land = calculate_land_growth(gov, infra, base_land)
         score = fitness_function(pop, land, weight_pop, weight_land)
         results.append({
             "Government": gov,
             "DEFCON": d,
             "War_Mode": w,
-            "Tax_Rate": t,
+            "Tax_Rate": FIXED_TAX_RATE,
             "Population": round(pop, 2),
             "Land": round(land, 2),
             "Fitness": round(score, 2)
@@ -229,7 +234,7 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
                 "Government": gov,
                 "DEFCON": d,
                 "War_Mode": w,
-                "Tax_Rate": t,
+                "Tax_Rate": FIXED_TAX_RATE,
                 "Population": round(pop, 2),
                 "Land": round(land, 2),
                 "Fitness": round(score, 2)
@@ -241,7 +246,7 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
 # =============================================================================
 
 st.title("Cyber Nations | Population + Land Growth Optimization Tool")
-st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth.")
+st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth. Note: The tax rate is fixed at 30% as this is the standard setting tolerated by most players.")
 
 st.sidebar.header("Base Parameters")
 infra = st.sidebar.number_input("Infrastructure Level", min_value=0, value=3000, step=100)
@@ -251,10 +256,14 @@ base_land = st.sidebar.number_input("Current Land Area", min_value=0, value=1000
 st.sidebar.header("Optimization Weights and Factors")
 weight_pop = st.sidebar.slider("Weight for Population", 0.0, 2.0, 1.0, 0.1)
 weight_land = st.sidebar.slider("Weight for Land", 0.0, 2.0, 1.0, 0.1)
-happiness_factor = st.sidebar.number_input("Happiness Factor", min_value=1, value=100, step=10,
+happiness_factor = st.sidebar.number_input(
+    "Happiness Factor", 
+    min_value=1, 
+    value=100, 
+    step=10,
     help="Scales the total happiness adjustment (from government, DEFCON, and technology). For example, if the total adjustment is 2, a factor of 100 adds 200 to the population. This is needed because the raw adjustments are small integers; the factor amplifies their effect, making happiness a more significant driver of population growth in the model."
 )
-# Optimize button in sidebar
+
 if st.sidebar.button("Optimize"):
     with st.spinner("Optimizing, please wait..."):
         best_config, results_df = optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness_factor)
