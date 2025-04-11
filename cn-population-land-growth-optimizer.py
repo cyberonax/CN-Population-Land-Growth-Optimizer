@@ -143,7 +143,7 @@ happiness_factor = st.sidebar.number_input(
     min_value=1, 
     value=100, 
     step=10,
-    help="Scales the total happiness adjustment from government, DEFCON, and technology."
+    help="Scales the total happiness adjustment (from government, DEFCON, and technology). For example, if the total adjustment is 2, a factor of 100 adds 200 to the population. This is needed because the raw adjustments are small integers; the factor amplifies their effect, making happiness a more significant driver of population growth in the model."
 )
 
 if st.sidebar.button("Optimize"):
