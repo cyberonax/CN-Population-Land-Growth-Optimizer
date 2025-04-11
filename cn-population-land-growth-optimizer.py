@@ -273,7 +273,7 @@ if st.sidebar.button("Optimize"):
     # Convert "Fitness" column to numeric (if not already) to ensure proper sorting.
     results_df["Fitness"] = pd.to_numeric(results_df["Fitness"])
     
-    # Sort the DataFrame by the "Fitness" column in descending order.
+    # Sort the DataFrame by the "Fitness" column in descending order BEFORE displaying.
     sorted_results = results_df.sort_values(by="Fitness", ascending=False).reset_index(drop=True)
     
     st.subheader("Evaluated Configurations (Sorted by Highest Fitness)")
