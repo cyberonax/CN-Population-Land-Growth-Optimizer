@@ -238,7 +238,15 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
                 "Land": round(land, 2),
                 "Fitness": round(score, 2)
             }
-    return best_config, pd.DataFrame(results)
+    # Create DataFrame from results
+    results_df = pd.DataFrame(results)
+
+    # Ensure that "Fitness" is treated as a numeric column
+    results_df["Fitness"] = pd.to_numeric(results_df["Fitness"])
+
+    # Sort by Fitness (descending) and use Population as a secondary sort to break ties
+    sorted_results = results_df.sort_values(by=["Fitness", "Population"], ascending=[False, False]).reset_index(drop=True)
+    return best_config, sorted_results
 
 # =============================================================================
 # Streamlit User Interface
@@ -269,11 +277,8 @@ if st.sidebar.button("Optimize"):
     st.subheader("Best Configuration Found")
     st.write(best_config)
     st.subheader("Evaluated Configurations (Sorted by Highest Fitness)")
-    # Convert Fitness column to numeric and sort by it in descending order.
-    results_df["Fitness"] = pd.to_numeric(results_df["Fitness"], errors="coerce")
-    sorted_results = results_df.sort_values(by="Fitness", ascending=False).reset_index(drop=True)
-    st.dataframe(sorted_results.head(20))
-    csv = sorted_results.to_csv(index=False).encode('utf-8')
+    st.dataframe(results_df.head(20))
+    csv = results_df.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="Download Results",
         data=csv,
