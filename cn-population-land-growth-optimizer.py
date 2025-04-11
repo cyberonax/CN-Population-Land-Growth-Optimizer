@@ -214,14 +214,14 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
     best_config = None
     results = []
     # Since the tax rate is fixed at 30%, we no longer iterate over it.
-    for gov, d, w in itertools.product(GOVERNMENTS.keys(), DEFCON_HAPPINESS.keys(), WAR_MODES):
-        pop = calculate_population(gov, d, w, infra, tech, happiness_factor=happiness_factor)
+    for gov, defcon, war in itertools.product(GOVERNMENTS.keys(), DEFCON_HAPPINESS.keys(), WAR_MODES):
+        pop = calculate_population(gov, defcon, war, infra, tech, happiness_factor=happiness_factor)
         land = calculate_land_growth(gov, infra, base_land)
         score = fitness_function(pop, land, weight_pop, weight_land)
         results.append({
             "Government": gov,
-            "DEFCON": d,
-            "War_Mode": w,
+            "DEFCON": defcon,
+            "War_Mode": war,
             "Tax_Rate": FIXED_TAX_RATE,
             "Population": round(pop, 2),
             "Land": round(land, 2),
@@ -231,22 +231,14 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
             best_score = score
             best_config = {
                 "Government": gov,
-                "DEFCON": d,
-                "War_Mode": w,
+                "DEFCON": defcon,
+                "War_Mode": war,
                 "Tax_Rate": FIXED_TAX_RATE,
                 "Population": round(pop, 2),
                 "Land": round(land, 2),
                 "Fitness": round(score, 2)
             }
-    # Create DataFrame from results
-    results_df = pd.DataFrame(results)
-
-    # Ensure that "Fitness" is treated as a numeric column
-    results_df["Fitness"] = pd.to_numeric(results_df["Fitness"])
-
-    # Sort by Fitness (descending) and use Population as a secondary sort to break ties
-    sorted_results = results_df.sort_values(by=["Fitness", "Population"], ascending=[False, False]).reset_index(drop=True)
-    return best_config, sorted_results
+    return best_config, pd.DataFrame(results)
 
 # =============================================================================
 # Streamlit User Interface
@@ -274,11 +266,20 @@ happiness_factor = st.sidebar.number_input(
 if st.sidebar.button("Optimize"):
     with st.spinner("Optimizing, please wait..."):
         best_config, results_df = optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness_factor)
+    
     st.subheader("Best Configuration Found")
     st.write(best_config)
+    
+    # Convert "Fitness" column to numeric (if not already) to ensure proper sorting.
+    results_df["Fitness"] = pd.to_numeric(results_df["Fitness"])
+    
+    # Sort the DataFrame by the "Fitness" column in descending order.
+    sorted_results = results_df.sort_values(by="Fitness", ascending=False).reset_index(drop=True)
+    
     st.subheader("Evaluated Configurations (Sorted by Highest Fitness)")
-    st.dataframe(results_df.head(20))
-    csv = results_df.to_csv(index=False).encode('utf-8')
+    st.dataframe(sorted_results.head(20))
+    
+    csv = sorted_results.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="Download Results",
         data=csv,
