@@ -132,8 +132,7 @@ DEFCON_HAPPINESS = {5: 2, 4: 1, 3: 0, 2: -1, 1: -2}
 # Other Key Variables
 #
 # War mode is a boolean array indicating whether the nation is at war.
-# Tax rate is fixed at 30%, since most players consider taxes lower than 28% intolerable
-# and 30% is the standard setting.
+# Tax rate is fixed at 30%, since most players consider taxes lower than 28% intolerable.
 # =============================================================================
 WAR_MODES = [True, False]
 FIXED_TAX_RATE = 30  # Fixed at 30%
@@ -246,7 +245,7 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
 # =============================================================================
 
 st.title("Cyber Nations | Population + Land Growth Optimization Tool")
-st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth. Note: The tax rate is fixed at 30% as this is the standard setting tolerated by most players.")
+st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth. Note: The tax rate is fixed at 30%, as this is the standard setting tolerated by most players.")
 
 st.sidebar.header("Base Parameters")
 infra = st.sidebar.number_input("Infrastructure Level", min_value=0, value=3000, step=100)
