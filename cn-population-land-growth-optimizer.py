@@ -240,7 +240,7 @@ def optimize_settings(infra, tech, base_land, weight_pop, weight_land, happiness
 # Streamlit User Interface
 # =============================================================================
 
-st.title("Cyber Nations Optimization Tool")
+st.title("Cyber Nations Population + Land Growth Optimization Tool")
 st.write("This simulation uses formulas derived from the official Cyber Nations website to optimize settings for maximum population and land growth.")
 
 st.sidebar.header("Base Parameters")
